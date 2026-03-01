@@ -1,4 +1,4 @@
-package com.example.furniture.respository;
+package com.example.furniture.repository;
 
 import com.example.furniture.model.Furniture;
 import jakarta.annotation.PostConstruct;
@@ -25,7 +25,7 @@ public class FurnitureFileRepository {
     public void init() {
         try {
             path = Paths.get(filePath);
-
+            Files.createDirectories(path.getParent());
             if (!Files.exists(path)) {
                 Files.createFile(path);
             }
