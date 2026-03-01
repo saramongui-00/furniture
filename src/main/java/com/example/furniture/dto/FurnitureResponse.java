@@ -10,4 +10,5 @@ public class FurnitureResponse {
     private double weight;
     private double price;
     private String message;
+    private String server_message;
 }
