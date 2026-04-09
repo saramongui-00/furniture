@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ResponseWrapped <T>{
+public class ResponseWrapped<T> {
 
     private String ip;
     private T data;

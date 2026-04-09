@@ -4,6 +4,7 @@ import com.example.furniture.dto.*;
 import com.example.furniture.service.FurnitureService;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+
 @RestController
 @RequestMapping("/furniture")
 public class FurnitureController {
@@ -20,9 +21,8 @@ public class FurnitureController {
     }
 
     @GetMapping
-    public List<FurnitureDto> getPeople(){
+    public List<FurnitureDto> getPeople() {
         return furnitureService.getAll();
     }
-
 
 }

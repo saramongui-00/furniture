@@ -5,6 +5,8 @@ import com.example.furniture.model.entity.FurnitureEntity;
 import com.example.furniture.repository.FurnitureRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.InetAddress;
 import java.util.List;
@@ -12,6 +14,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class FurnitureService {
+
+    private static final Logger log = LoggerFactory.getLogger(FurnitureService.class);
 
     private final FurnitureRepository repository;
 
@@ -23,15 +27,16 @@ public class FurnitureService {
     }
 
     public ResponseWrapped<FurnitureResponse> save(FurnitureRequest request) {
+        log.info("Guardando mueble: {}", request);
 
         FurnitureEntity entity = new FurnitureEntity(
                 null,
                 request.getName(),
                 request.getWeight(),
-                request.getPrice()
-        );
+                request.getPrice());
 
         FurnitureEntity saved = repository.save(entity);
+        log.info("Mueble guardado con ID={}", saved.getId());
 
         FurnitureResponse response = new FurnitureResponse();
         response.setId(saved.getId());
@@ -45,7 +50,8 @@ public class FurnitureService {
     }
 
     public List<FurnitureDto> getAll() {
-        return repository.findAll()
+        log.debug("Obteniendo lista de muebles");
+        List<FurnitureDto> list = repository.findAll()
                 .stream()
                 .map(entity -> {
                     FurnitureDto dto = new FurnitureDto();
@@ -57,6 +63,8 @@ public class FurnitureService {
                     return dto;
                 })
                 .collect(Collectors.toList());
+        log.info("Se obtuvieron {} muebles", list.size());
+        return list;
     }
 
     private String getIp() {
