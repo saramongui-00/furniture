@@ -2,10 +2,11 @@ package com.example.furniture.controller;
 
 import com.example.furniture.dto.*;
 import com.example.furniture.service.FurnitureService;
+
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Page;
 import java.util.List;
 
 @RestController
@@ -13,7 +14,6 @@ import java.util.List;
 public class FurnitureController {
 
     private static final Logger log = LoggerFactory.getLogger(FurnitureController.class);
-
     private final FurnitureService furnitureService;
 
     public FurnitureController(FurnitureService furnitureService) {
@@ -30,20 +30,28 @@ public class FurnitureController {
     }
 
     @GetMapping
-    public List<FurnitureDto> getPeople() {
-        log.debug("Solicitud recibida para listar muebles");
+    public List<FurnitureDto> getFurniture() { // Cambié el nombre de getPeople a getFurniture
+        log.info("Solicitud recibida para listar todos los muebles");
         List<FurnitureDto> muebles = furnitureService.getAll();
         log.info("Se retornaron {} muebles", muebles.size());
         return muebles;
     }
 
-    @GetMapping("/paged")
-    public Page<FurnitureDto> getFurniturePaged(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        log.info("Solicitud recibida para listar muebles paginados: page={}, size={}", page, size);
-        Page<FurnitureDto> muebles = furnitureService.getAllPaged(page, size);
-        log.info("Se retornaron {} muebles en la página {}", muebles.getNumberOfElements(), page);
-        return muebles;
+    @GetMapping("/{id}")
+    public ResponseEntity<FurnitureDto> getFurnitureById(@PathVariable Long id) {
+        log.info("Solicitud recibida para obtener mueble con ID: {}", id);
+
+        try {
+            FurnitureDto furniture = furnitureService.getById(id);
+            log.info("Mueble encontrado: ID={}, nombre={}", id, furniture.getName());
+            return ResponseEntity.ok(furniture);
+        } catch (RuntimeException e) {
+            log.error("Mueble no encontrado con ID: {}", id);
+            return ResponseEntity.notFound().build();
+        }
     }
+
+    // ELIMINA ESTE MÉTODO COMPLETO:
+    // @GetMapping("/paged")
+    // public Page<FurnitureDto> getFurniturePaged(...) { ... }
 }

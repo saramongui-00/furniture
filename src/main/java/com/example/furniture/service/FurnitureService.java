@@ -4,7 +4,6 @@ import com.example.furniture.dto.*;
 import com.example.furniture.model.entity.FurnitureEntity;
 import com.example.furniture.repository.FurnitureRepository;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,17 +12,13 @@ import java.net.InetAddress;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-
 @Service
 public class FurnitureService {
 
     private static final Logger log = LoggerFactory.getLogger(FurnitureService.class);
-
     private final FurnitureRepository repository;
 
-    @Value("${server.message}")
+    @Value("${server.message:Servicio de muebles funcionando}")
     private String serverMessage;
 
     public FurnitureService(FurnitureRepository repository) {
@@ -54,21 +49,35 @@ public class FurnitureService {
     }
 
     public List<FurnitureDto> getAll() {
-        log.debug("Obteniendo lista de muebles");
+        log.info("Obteniendo todos los muebles");
         List<FurnitureDto> list = repository.findAll()
                 .stream()
-                .map(entity -> {
-                    FurnitureDto dto = new FurnitureDto();
-                    dto.setName(entity.getName());
-                    dto.setWeight(entity.getWeight());
-                    dto.setPrice(entity.getPrice());
-                    dto.setIp(getIp());
-                    dto.setServer_message(serverMessage);
-                    return dto;
-                })
+                .map(this::convertToDto)
                 .collect(Collectors.toList());
         log.info("Se obtuvieron {} muebles", list.size());
         return list;
+    }
+
+    // NUEVO MÉTODO: Obtener mueble por ID
+    public FurnitureDto getById(Long id) {
+        log.info("Buscando mueble con ID: {}", id);
+
+        FurnitureEntity entity = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Mueble no encontrado con ID: " + id));
+
+        log.info("Mueble encontrado: {}", entity.getName());
+        return convertToDto(entity);
+    }
+
+    // Método auxiliar para convertir Entity a DTO
+    private FurnitureDto convertToDto(FurnitureEntity entity) {
+        FurnitureDto dto = new FurnitureDto();
+        dto.setName(entity.getName());
+        dto.setWeight(entity.getWeight());
+        dto.setPrice(entity.getPrice());
+        dto.setIp(getIp());
+        dto.setServer_message(serverMessage);
+        return dto;
     }
 
     private String getIp() {
@@ -78,25 +87,4 @@ public class FurnitureService {
             return "unknown";
         }
     }
-
-    public Page<FurnitureDto> getAllPaged(int page, int size) {
-        log.debug("Obteniendo muebles paginados: page={}, size={}", page, size);
-
-        Pageable pageable = PageRequest.of(page, size);
-        Page<FurnitureEntity> entities = repository.findAll(pageable);
-
-        Page<FurnitureDto> dtoPage = entities.map(entity -> {
-            FurnitureDto dto = new FurnitureDto();
-            dto.setName(entity.getName());
-            dto.setWeight(entity.getWeight());
-            dto.setPrice(entity.getPrice());
-            dto.setIp(getIp());
-            dto.setServer_message(serverMessage);
-            return dto;
-        });
-
-        log.info("Página {} obtenida con {} registros", page, dtoPage.getNumberOfElements());
-        return dtoPage;
-    }
-
 }
