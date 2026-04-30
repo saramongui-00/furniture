@@ -2,11 +2,11 @@ package com.example.furniture.controller;
 
 import com.example.furniture.dto.*;
 import com.example.furniture.service.FurnitureService;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.util.List;
 
 @RestController
@@ -29,12 +29,17 @@ public class FurnitureController {
         return response;
     }
 
+    // 🔥 NUEVO ENDPOINT CON CURSOR PAGINATION
+    // Ejemplos:
+    // /furniture?size=5
+    // /furniture?lastId=20&size=5
     @GetMapping
-    public List<FurnitureDto> getFurniture() { // Cambié el nombre de getPeople a getFurniture
-        log.info("Solicitud recibida para listar todos los muebles");
-        List<FurnitureDto> muebles = furnitureService.getAll();
-        log.info("Se retornaron {} muebles", muebles.size());
-        return muebles;
+    public List<FurnitureDto> getFurniture(
+            @RequestParam(required = false) Long lastId,
+            @RequestParam(defaultValue = "5") int size
+    ) {
+        log.info("Solicitud paginada cursor -> lastId={}, size={}", lastId, size);
+        return furnitureService.getFurnitureCursor(lastId, size);
     }
 
     @GetMapping("/{id}")
@@ -50,8 +55,4 @@ public class FurnitureController {
             return ResponseEntity.notFound().build();
         }
     }
-
-    // ELIMINA ESTE MÉTODO COMPLETO:
-    // @GetMapping("/paged")
-    // public Page<FurnitureDto> getFurniturePaged(...) { ... }
 }
